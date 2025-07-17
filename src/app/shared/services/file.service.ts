@@ -116,7 +116,6 @@ import { environment } from '../../../environments/environment';
 export class FileService {
   // Construct the specific API path for files
   private fileApiUrl = `${environment.apiUrl}/api/v1`;
-  private downloadBaseUrl = environment.downloadBaseUrl;
 
   constructor(private http: HttpClient) { }
 
@@ -125,8 +124,8 @@ export class FileService {
   }
 
   getStreamUrl(id: string): string {
-    // Use the Cloudflare Worker URL for downloads
-    return `${this.downloadBaseUrl}/${id}`;
+    // This now correctly constructs the full backend URL for downloads
+    return `${this.fileApiUrl}/download/stream/${id}`;
   }
 
   getUserFiles(): Observable<any> {

@@ -1,0 +1,7 @@
+{
+    "/api": {
+      "target": "https://storage-frontend-six.vercel.app/",
+      "secure": false,
+      "changeOrigin": true
+    }
+  }

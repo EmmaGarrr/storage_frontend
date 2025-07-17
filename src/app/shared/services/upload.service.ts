@@ -1,193 +1,404 @@
-// In file: Frontend/src/app/shared/services/upload.service.ts
+// // // // In file: Frontend/src/app/services/upload.service.ts
 
-import { HttpClient, HttpEvent, HttpEventType, HttpRequest, HttpHeaders } from '@angular/common/http';
+// // // import { HttpClient } from '@angular/common/http';
+// // // import { Injectable } from '@angular/core';
+// // // import { Observable, Observer, throwError } from 'rxjs';
+// // // import { catchError, switchMap } from 'rxjs/operators';
+// // // import { environment } from '../../../environments/environment';
+
+// // // export interface UploadEvent {
+// // //   type: 'progress' | 'success' | 'error';
+// // //   value: any;
+// // // }
+
+// // // interface InitiateUploadResponse {
+// // //   file_id: string;
+// // //   gdrive_upload_url: string;
+// // // }
+
+// // // @Injectable({
+// // //   providedIn: 'root'
+// // // })
+// // // export class UploadService {
+// // //   private apiUrl = environment.apiUrl;
+// // //   private wsUrl = environment.wsUrl;
+
+// // //   constructor(private http: HttpClient) { }
+
+// // //   public upload(file: File): Observable<UploadEvent> {
+// // //     const fileInfo = {
+// // //       filename: file.name,
+// // //       size: file.size,
+// // //       content_type: file.type || 'application/octet-stream'
+// // //     };
+
+// // //     return this.initiateUpload(fileInfo).pipe(
+// // //       switchMap(response => {
+// // //         return new Observable((observer: Observer<UploadEvent>) => {
+// // //           const fileId = response.file_id;
+// // //           const gdriveUploadUrl = response.gdrive_upload_url;
+// // //           const encodedGdriveUrl = encodeURIComponent(gdriveUploadUrl);
+// // //           const finalWsUrl = `${this.wsUrl}/upload/${fileId}/${encodedGdriveUrl}`;
+          
+// // //           console.log(`[Uploader] Connecting to WebSocket: ${finalWsUrl}`);
+// // //           const ws = new WebSocket(finalWsUrl);
+          
+// // //           ws.onopen = () => {
+// // //             console.log(`[Uploader WS] Connection opened for ${fileId}. Starting file stream.`);
+// // //             this.sliceAndSend(file, ws);
+// // //           };
+
+// // //           ws.onmessage = (event) => {
+// // //             try {
+// // //               const message = JSON.parse(event.data);
+// // //               if (message.type === 'progress' || message.type === 'success' || message.type === 'error') {
+// // //                  observer.next(message as UploadEvent);
+// // //               }
+// // //             } catch (e) {
+// // //               console.error('[Uploader WS] Failed to parse message from server:', event.data);
+// // //             }
+// // //           };
+
+// // //           ws.onerror = (error) => {
+// // //             console.error('[Uploader WS] Error:', error);
+// // //             observer.error({ type: 'error', value: 'Connection to server failed.' });
+// // //           };
+
+// // //           ws.onclose = (event) => {
+// // //             // --- THIS IS THE FIX ---
+// // //             // We simply check if the closure was 'unclean'. If so, we try to send an error.
+// // //             // RxJS's observer is smart enough to ignore this call if it's already closed.
+// // //             if (!event.wasClean) {
+// // //                 observer.error({ type: 'error', value: 'Lost connection to server during upload.' });
+// // //             } else {
+// // //                 // A clean closure means the server finished its sequence (success/error).
+// // //                 // It's safe to call complete() even if error() was already called.
+// // //                 observer.complete();
+// // //             }
+// // //           };
+
+// // //           return () => {
+// // //             if (ws.readyState === WebSocket.OPEN) {
+// // //               ws.close();
+// // //             }
+// // //           };
+// // //         });
+// // //       }),
+// // //       catchError(err => {
+// // //         console.error('HTTP Initiation failed', err);
+// // //         const errorMsg = err.error?.detail || 'Could not initiate upload with the server.';
+// // //         return throwError(() => ({ type: 'error', value: errorMsg }));
+// // //       })
+// // //     );
+// // //   }
+
+// // //   private initiateUpload(fileInfo: { filename: string; size: number; content_type: string; }): Observable<InitiateUploadResponse> {
+// // //     return this.http.post<InitiateUploadResponse>(`${this.apiUrl}/api/v1/upload/initiate`, fileInfo);
+// // //   }
+
+// // //   private sliceAndSend(file: File, ws: WebSocket, start: number = 0): void {
+// // //     const CHUNK_SIZE = 4 * 1024 * 1024; // 4MB
+
+// // //     if (start >= file.size) {
+// // //       ws.send('DONE');
+// // //       return;
+// // //     }
+
+// // //     const end = Math.min(start + CHUNK_SIZE, file.size);
+// // //     const chunk = file.slice(start, end);
+
+// // //     const reader = new FileReader();
+// // //     reader.onload = (e) => {
+// // //       if (ws.readyState === WebSocket.OPEN) {
+// // //         ws.send(e.target?.result as ArrayBuffer);
+// // //         this.sliceAndSend(file, ws, end);
+// // //       }
+// // //     };
+// // //     reader.readAsArrayBuffer(chunk);
+// // //   }
+// // // }
+
+
+// // // In file: Frontend/src/app/services/upload.service.ts
+
+// // import { HttpClient } from '@angular/common/http';
+// // import { Injectable } from '@angular/core';
+// // import { Observable, Observer, throwError } from 'rxjs';
+// // import { catchError, switchMap } from 'rxjs/operators';
+// // import { environment } from '../../../environments/environment';
+
+// // export interface UploadEvent {
+// //   type: 'progress' | 'success' | 'error';
+// //   value: any;
+// // }
+
+// // interface InitiateUploadResponse {
+// //   file_id: string;
+// //   gdrive_upload_url: string;
+// // }
+
+// // @Injectable({
+// //   providedIn: 'root'
+// // })
+// // export class UploadService {
+// //   private apiUrl = environment.apiUrl;
+// //   private wsUrl = environment.wsUrl;
+
+// //   constructor(private http: HttpClient) { }
+
+// //   public upload(file: File): Observable<UploadEvent> {
+// //     const fileInfo = {
+// //       filename: file.name,
+// //       size: file.size,
+// //       content_type: file.type || 'application/octet-stream'
+// //     };
+
+// //     return this.initiateUpload(fileInfo).pipe(
+// //       switchMap(response => {
+// //         return new Observable((observer: Observer<UploadEvent>) => {
+// //           const fileId = response.file_id;
+// //           const gdriveUploadUrl = response.gdrive_upload_url;
+
+// //           // --- THIS IS THE FIX: DOUBLE URL ENCODING ---
+// //           // We encode it once to handle special chars like '&' and '?'.
+// //           // We encode it a SECOND time so that the server's single-pass
+// //           // decoder still leaves a valid, single encoded string for the router.
+// //           const finalEncodedGdriveUrl = encodeURIComponent(encodeURIComponent(gdriveUploadUrl));
+
+// //           const finalWsUrl = `${this.wsUrl}/upload/${fileId}/${finalEncodedGdriveUrl}`;
+          
+// //           console.log(`[Uploader] Connecting to WebSocket: ${finalWsUrl}`);
+// //           const ws = new WebSocket(finalWsUrl);
+          
+// //           ws.onopen = () => {
+// //             console.log(`[Uploader WS] Connection opened for ${fileId}. Starting file stream.`);
+// //             this.sliceAndSend(file, ws);
+// //           };
+
+// //           ws.onmessage = (event) => {
+// //             try {
+// //               const message = JSON.parse(event.data);
+// //               if (message.type === 'progress' || message.type === 'success' || message.type === 'error') {
+// //                  observer.next(message as UploadEvent);
+// //               }
+// //             } catch (e) {
+// //               console.error('[Uploader WS] Failed to parse message from server:', event.data);
+// //             }
+// //           };
+
+// //           ws.onerror = (error) => {
+// //             console.error('[Uploader WS] Error:', error);
+// //             observer.error({ type: 'error', value: 'Connection to server failed.' });
+// //           };
+
+// //           ws.onclose = (event) => {
+// //             if (!event.wasClean) {
+// //                 observer.error({ type: 'error', value: 'Lost connection to server during upload.' });
+// //             } else {
+// //                 observer.complete();
+// //             }
+// //           };
+
+// //           return () => {
+// //             if (ws.readyState === WebSocket.OPEN) {
+// //               ws.close();
+// //             }
+// //           };
+// //         });
+// //       }),
+// //       catchError(err => {
+// //         console.error('HTTP Initiation failed', err);
+// //         const errorMsg = err.error?.detail || 'Could not initiate upload with the server.';
+// //         return throwError(() => ({ type: 'error', value: errorMsg }));
+// //       })
+// //     );
+// //   }
+
+// //   private initiateUpload(fileInfo: { filename: string; size: number; content_type: string; }): Observable<InitiateUploadResponse> {
+// //     return this.http.post<InitiateUploadResponse>(`${this.apiUrl}/api/v1/upload/initiate`, fileInfo);
+// //   }
+
+// //   private sliceAndSend(file: File, ws: WebSocket, start: number = 0): void {
+// //     const CHUNK_SIZE = 4 * 1024 * 1024; // 4MB
+
+// //     if (start >= file.size) {
+// //       ws.send('DONE');
+// //       return;
+// //     }
+
+// //     const end = Math.min(start + CHUNK_SIZE, file.size);
+// //     const chunk = file.slice(start, end);
+
+// //     const reader = new FileReader();
+// //     reader.onload = (e) => {
+// //       if (ws.readyState === WebSocket.OPEN) {
+// //         ws.send(e.target?.result as ArrayBuffer);
+// //         this.sliceAndSend(file, ws, end);
+// //       }
+// //     };
+// //     reader.readAsArrayBuffer(chunk);
+// //   }
+// // }
+
+
+// // In file: Frontend/src/app/services/upload.service.ts
+
+// import { HttpClient } from '@angular/common/http';
+// import { Injectable } from '@angular/core';
+// import { Observable, Observer, throwError } from 'rxjs';
+// import { catchError, switchMap } from 'rxjs/operators';
+// import { environment } from '../../../environments/environment';
+
+// export interface UploadEvent {
+//   type: 'progress' | 'success' | 'error';
+//   value: any;
+// }
+
+// interface InitiateUploadResponse {
+//   file_id: string;
+//   gdrive_upload_url: string;
+// }
+
+// @Injectable({
+//   providedIn: 'root'
+// })
+// export class UploadService {
+//   private apiUrl = environment.apiUrl;
+//   private wsUrl = environment.wsUrl;
+
+//   constructor(private http: HttpClient) { }
+
+//   public upload(file: File): Observable<UploadEvent> {
+//     const fileInfo = {
+//       filename: file.name,
+//       size: file.size,
+//       content_type: file.type || 'application/octet-stream'
+//     };
+
+//     return this.initiateUpload(fileInfo).pipe(
+//       switchMap(response => {
+//         return new Observable((observer: Observer<UploadEvent>) => {
+//           const fileId = response.file_id;
+//           const gdriveUploadUrl = response.gdrive_upload_url;
+
+//           // --- THIS IS THE DEFINITIVE FIX (FRONTEND) ---
+//           // We construct a URL with a query parameter.
+//           // We use encodeURIComponent ONCE to make the URL safe as a value.
+//           const finalWsUrl = `${this.wsUrl}/upload/${fileId}?gdrive_url=${encodeURIComponent(gdriveUploadUrl)}`;
+          
+//           console.log(`[Uploader] Connecting to WebSocket: ${finalWsUrl}`);
+//           const ws = new WebSocket(finalWsUrl);
+          
+//           ws.onopen = () => {
+//             console.log(`[Uploader WS] Connection opened for ${fileId}. Starting file stream.`);
+//             this.sliceAndSend(file, ws);
+//           };
+
+//           ws.onmessage = (event) => {
+//             try {
+//               const message = JSON.parse(event.data);
+//               if (message.type === 'progress' || message.type === 'success' || message.type === 'error') {
+//                  observer.next(message as UploadEvent);
+//               }
+//             } catch (e) {
+//               console.error('[Uploader WS] Failed to parse message from server:', event.data);
+//             }
+//           };
+
+//           ws.onerror = (error) => {
+//             console.error('[Uploader WS] Error:', error);
+//             observer.error({ type: 'error', value: 'Connection to server failed.' });
+//           };
+
+//           ws.onclose = (event) => {
+//             if (!event.wasClean) {
+//                 observer.error({ type: 'error', value: 'Lost connection to server during upload.' });
+//             } else {
+//                 observer.complete();
+//             }
+//           };
+
+//           return () => {
+//             if (ws.readyState === WebSocket.OPEN) {
+//               ws.close();
+//             }
+//           };
+//         });
+//       }),
+//       catchError(err => {
+//         console.error('HTTP Initiation failed', err);
+//         const errorMsg = err.error?.detail || 'Could not initiate upload with the server.';
+//         return throwError(() => ({ type: 'error', value: errorMsg }));
+//       })
+//     );
+//   }
+
+//   private initiateUpload(fileInfo: { filename: string; size: number; content_type: string; }): Observable<InitiateUploadResponse> {
+//     return this.http.post<InitiateUploadResponse>(`${this.apiUrl}/api/v1/upload/initiate`, fileInfo);
+//   }
+
+//   private sliceAndSend(file: File, ws: WebSocket, start: number = 0): void {
+//     const CHUNK_SIZE = 4 * 1024 * 1024; // 4MB
+
+//     if (start >= file.size) {
+//       ws.send('DONE');
+//       return;
+//     }
+
+//     const end = Math.min(start + CHUNK_SIZE, file.size);
+//     const chunk = file.slice(start, end);
+
+//     const reader = new FileReader();
+//     reader.onload = (e) => {
+//       if (ws.readyState === WebSocket.OPEN) {
+//         ws.send(e.target?.result as ArrayBuffer);
+//         this.sliceAndSend(file, ws, end);
+//       }
+//     };
+//     reader.readAsArrayBuffer(chunk);
+//   }
+// }
+
+
+
+
+// In file: src/app/shared/services/upload.service.ts
+
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, throwError } from 'rxjs';
-import { catchError, map, tap } from 'rxjs/operators';
+import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { LoggingService } from './logging.service';
 
-/**
- * Event emitted during the upload process
- */
-export interface UploadEvent {
-  type: 'progress' | 'success' | 'error';
-  value: any; // progress percentage, download URL, or error message
-}
-
-/**
- * Response from the upload endpoint
- */
-interface UploadResponse {
+export interface InitiateUploadResponse {
   file_id: string;
-  share_url: string;
+  gdrive_upload_url: string;
 }
 
-/**
- * Service for handling file uploads to the DirectDrive backend
- */
 @Injectable({
   providedIn: 'root'
 })
 export class UploadService {
-  private apiUrl = environment.apiUrl;
-  private downloadBaseUrl = environment.downloadBaseUrl;
+  private apiUrl = `${environment.apiUrl}/api/v1/upload`;
 
-  constructor(
-    private http: HttpClient,
-    private loggingService: LoggingService
-  ) { }
+  constructor(private http: HttpClient) {}
 
   /**
-   * Upload a file using HTTP multipart/form-data
-   * 
-   * @param file The file to upload
-   * @returns Observable that emits progress, success, or error events
+   * Step 1: Tell the backend we want to upload a file.
+   * The backend returns a unique file ID and a one-time Google Drive URL.
    */
-  public upload(file: File): Observable<UploadEvent> {
-    // Start timing the upload operation
-    this.loggingService.startTiming('file_upload');
-    
-    // Log upload start with file metadata
-    this.loggingService.logFileUpload('start', {
-      filename: file.name,
-      fileSize: file.size,
-      fileType: file.type,
-      lastModified: new Date(file.lastModified).toISOString()
-    });
-    
-    // Create the HTTP request using the File object directly as body (no FormData)
-    const headers = new HttpHeaders({
-      'X-File-Name': file.name,
-      'X-File-Type': file.type || 'application/octet-stream',
-      'Content-Type': file.type || 'application/octet-stream'
-    });
-
-    const req = new HttpRequest<any>('POST', `${this.apiUrl}/api/v1/upload`, file, {
-      reportProgress: true,
-      responseType: 'json',
-      headers
-    });
-
-    // Send the request and map the events
-    return this.http.request(req).pipe(
-      tap((event: HttpEvent<any>) => {
-        // Log progress events
-        if (event.type === HttpEventType.UploadProgress) {
-          const progress = event.total ? Math.round(100 * event.loaded / event.total) : 0;
-          
-          // Add checkpoints at 25%, 50%, 75%, and 100%
-          if (progress === 25 || progress === 50 || progress === 75 || progress === 100) {
-            this.loggingService.addTimingCheckpoint('file_upload', `upload_${progress}pct`);
-          }
-          
-          // Log progress every 10%
-          if (progress % 10 === 0) {
-            this.loggingService.logFileUpload('progress', {
-              filename: file.name,
-              fileSize: file.size,
-              progress: progress,
-              loaded: event.loaded,
-              total: event.total
-            }, {
-              uploadSpeed: this.calculateUploadSpeed(event.loaded, this.loggingService.endTiming('file_upload')?.duration || 0)
-            });
-            
-            // Restart timing for next progress segment
-            this.loggingService.startTiming('file_upload');
-          }
-        }
-        
-        // Log response
-        if (event.type === HttpEventType.Response) {
-          const body = event.body as UploadResponse;
-          const timingData = this.loggingService.endTiming('file_upload');
-          
-          this.loggingService.logFileUpload('complete', {
-            filename: file.name,
-            fileSize: file.size,
-            fileType: file.type,
-            shareUrl: body.share_url,
-            fileId: body.file_id
-          }, {
-            totalDuration: timingData?.duration,
-            checkpoints: timingData?.checkpoints
-          });
-        }
-      }),
-      map((event: HttpEvent<any>) => this.getEventFromResponse(event)),
-      catchError(error => {
-        // Log the error
-        this.loggingService.logFileUpload('error', {
-          filename: file.name,
-          fileSize: file.size,
-          fileType: file.type
-        }, {
-          error: error.message || 'Unknown error',
-          status: error.status,
-          statusText: error.statusText
-        });
-        
-        this.loggingService.logError(error, {
-          operation: 'file_upload',
-          filename: file.name,
-          fileSize: file.size
-        });
-        
-        const errorMsg = error.error?.detail || 'File upload failed. Please try again.';
-        return throwError(() => ({ type: 'error', value: errorMsg }));
-      })
-    );
+  initiateUpload(fileInfo: {
+    filename: string;
+    size: number;
+    content_type: string;
+  }): Observable<InitiateUploadResponse> {
+    return this.http.post<InitiateUploadResponse>(`${this.apiUrl}/initiate`, fileInfo);
   }
 
   /**
-   * Convert HTTP events to UploadEvent objects
-   * 
-   * @param event HTTP event from the request
-   * @returns Mapped UploadEvent
+   * Step 3: Tell the backend to verify the upload is complete.
+   * The backend updates the database.
    */
-  private getEventFromResponse(event: HttpEvent<any>): UploadEvent {
-    switch (event.type) {
-      case HttpEventType.UploadProgress:
-        // Calculate and return the upload progress percentage
-        const progress = event.total ? Math.round(100 * event.loaded / event.total) : 0;
-        return { type: 'progress', value: progress };
-
-      case HttpEventType.Response:
-        // Return the success event with the share URL
-        const body = event.body as UploadResponse;
-        return { 
-          type: 'success', 
-          value: body.share_url 
-        };
-
-      default:
-        // Ignore other event types
-        return { type: 'progress', value: 0 };
-    }
-  }
-
-  /**
-   * Get the download URL for a file
-   * 
-   * @param remotePath The remote path of the file
-   * @returns The full download URL
-   */
-  public getDownloadUrl(remotePath: string): string {
-    return `${this.downloadBaseUrl}/${remotePath}`;
-  }
-  
-  /**
-   * Calculate the upload speed in KB/s
-   * 
-   * @param bytesUploaded Number of bytes uploaded
-   * @param milliseconds Time elapsed in milliseconds
-   * @returns Upload speed in KB/s
-   */
-  private calculateUploadSpeed(bytesUploaded: number, milliseconds: number): number {
-    if (!milliseconds) return 0;
-    const seconds = milliseconds / 1000;
-    const kilobytes = bytesUploaded / 1024;
-    return Math.round((kilobytes / seconds) * 100) / 100; // KB/s with 2 decimal places
+  verifyUpload(fileId: string, gdriveId: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/verify/${fileId}`, { gdrive_id: gdriveId });
   }
 }

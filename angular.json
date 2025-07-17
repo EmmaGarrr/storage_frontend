@@ -78,7 +78,8 @@
               "buildTarget": "frontend-test:build:production"
             },
             "development": {
-              "buildTarget": "frontend-test:build:development"
+              "buildTarget": "frontend-test:build:development",
+              "proxyConfig": "proxy.conf.json"
             }
           },
           "defaultConfiguration": "development"
