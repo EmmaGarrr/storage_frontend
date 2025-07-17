@@ -1,0 +1,7 @@
+// In file: Frontend/src/environments/environment.ts
+
+export const environment = {
+  production: false,
+  apiUrl: 'http://localhost:5000',
+  downloadBaseUrl: 'http://localhost:5000/api/v1/files/download'
+};
